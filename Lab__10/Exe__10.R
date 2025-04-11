@@ -21,19 +21,19 @@ legend("topright", legend=c("DOF=2", "DOF=3", "DOF=5", "DOF=10"),
 ### 10b) PDF of Chi-Square Distribution at x = 6, df = 5
 
 chi_pdf_6_df5 <- dchisq(6, df=5)
-cat("10b) Chi-Square PDF at x = 6, df = 5:", chi_pdf_6_df5, "\n")
+cat("Chi-Square PDF at x = 6, df = 5:", chi_pdf_6_df5, "\n")
 
 
 ### 10c) CDF of Chi-Square Distribution up to x = 6, df = 10
 
 chi_cdf_6_df10 <- pchisq(6, df=10)
-cat("10c) Chi-Square CDF at x = 6, df = 10:", chi_cdf_6_df10, "\n")
+cat("Chi-Square CDF at x = 6, df = 10:", chi_cdf_6_df10, "\n")
 
 
 ### 10d) 85th Quantile of Chi-Square Distribution with df = 6
 
 chi_q_85_df6 <- qchisq(0.85, df=6)
-cat("10d) 85th Quantile (df = 6):", chi_q_85_df6, "\n")
+cat("85th Quantile (df = 6):", chi_q_85_df6, "\n")
 
 
 ### 10e) Histogram of Random Chi-Square Samples (df = 6)
@@ -43,7 +43,7 @@ chi_samples <- rchisq(10000, df=6)
 
 # Plot histogram with 30 bins
 hist(chi_samples, breaks=30, probability=TRUE, col="lightgreen",
-     main="10e) Histogram of Chi-Square (df = 6)", xlab="X")
+     main="Histogram of Chi-Square (df = 6)", xlab="X")
 
 # Overlay theoretical PDF
 curve(dchisq(x, df=6), col="lightseagreen", lwd=2, add=TRUE)
@@ -69,6 +69,6 @@ pdf_chisq_df1 <- dchisq(z_squared, df=1)
 
 # Plot
 plot(z_squared, pdf_chisq_df1, type="l", col="palevioletred1", lwd=2,
-     main="10f) Chi-Square PDF (df = 1)", xlab="Z²", ylab="Density")
+     main="Chi-Square PDF (df = 1)", xlab="Z²", ylab="Density")
 
 
