@@ -2,7 +2,7 @@
 
 # Qusetion 1:
 ## a)
-two_sample_Z_test <- function(x1, x2, sigma_x1, sigma_x2, alpha, null) {
+two_sample_Z_test <- function(x1, x2, sigma_x1, sigma_x2, alpha, null = 0) {
   n1 <- length(x1)
   n2 <- length(x2)
   mean_x1 <- mean(x1)
@@ -12,31 +12,85 @@ two_sample_Z_test <- function(x1, x2, sigma_x1, sigma_x2, alpha, null) {
   se <- sqrt((sigma_x1^2 / n1) + (sigma_x2^2 / n2))
   
   # Z statistic
-  z <- (mean_x1 - mean_x2) / se
+  z <- (mean_x1 - mean_x2 - null) / se
   
-  # p-value based on hypothesis
-  if (null == "equal") {
-    p_value <- 2 * (1 - pnorm(abs(z)))
-  } else if (null == "greater") {
-    p_value <- 1 - pnorm(z)
-  } else if (null == "less") {
-    p_value <- pnorm(z)
-  } else {
-    stop("Invalid null hypothesis type. Use 'equal', 'greater', or 'less'.")
-  }
+  # One-tailed test (right side, since H0: mu1 >= mu2 → Ha: mu1 < mu2)
+  p_value <- pnorm(z, lower.tail = FALSE)
   
-  conclusion <- ifelse(p_value < alpha, "Reject the null hypothesis", "Fail to reject the null hypothesis")
-  return(list(Z = z, p_value = p_value, conclusion = conclusion))
+  # Decision
+  decision <- ifelse(p_value < alpha, "Reject Null Hypothesis", "Fail to Reject Null Hypothesis")
+  
+  # Return results
+  list(
+    Z_statistic = z,
+    p_value = p_value,
+    decision = decision,
+    mean_x1 = mean_x1,
+    mean_x2 = mean_x2
+  )
 }
 
 ## b)
 # Read data (assumes space or tab delimited file)
-data <- read.table("two-sample.dat", header = FALSE)
-x1 <- data$V1
-x2 <- data$V2
+file.exists("/home/ibab/Desktop/Nandhi_BDBP209/two-sample.dat")
+#data <- read.table("/home/ibab/Desktop/Nandhi_BDBP209/two-sample.dat", header = FALSE, sep = "", fill = TRUE)
+x1 <-c( 258.0, 271.5, 189.1, 216.5, 237.2, 222.0, 231.3, 181.7, 220.0, 179.3, 238.1, 217.7,
+        246.2, 241.5, 233.8, 222.3, 199.2, 167.9, 216.2, 240.4, 235.3, 187.0, 233.7, 214.7,
+        174.6, 246.3, 185.7, 207.0, 244.3, 237.7, 245.2, 228.3, 201.8, 218.3, 242.7, 213.8,
+        231.9, 257.3, 208.4, 250.7, 198.3, 206.7, 259.7, 253.3, 200.3, 196.6, 210.6, 257.6,
+        173.5, 267.5, 167.2, 227.1, 172.1, 197.6, 256.9, 203.7, 195.1, 237.4, 210.2, 208.8,
+        218.0, 205.1, 241.1, 216.8, 223.6, 191.0, 225.9, 215.1, 233.1, 243.0)
+x2 <- c( 221.0, 213.0, 199.3, 211.2, 225.2, 229.1, 253.9, 194.6, 243.0, 221.9, 230.9, 221.1,
+         206.7, 217.2, 215.8, 203.0, 234.0, 196.3, 235.8, 234.3, 244.7, 248.8, 200.5, 232.0,
+         233.3, 220.6, 289.2, 244.9, 230.8, 182.9, 199.3, 263.2, 220.6, 266.7, 258.0, 243.9,
+         178.1, 200.7, 270.2, 224.4, 222.4, 234.6, 296.7, 202.3, 277.9, 204.3, 221.1, 257.0,
+         243.4, 239.4, 230.0, 263.5, 241.3, 216.6, 227.9, 230.1, 230.5, 188.6, 289.3, 234.4,
+         267.5, 256.0, 246.5, 210.5, 270.6, 295.5, 195.8, 235.3, 245.4, 245.4)
 
 # Apply the test
-two_sample_Z_test(x1, x2, sigma_x1 = 24.6, sigma_x2 = 27.8, alpha = 0.05, null = "greater")
+result=two_sample_Z_test(x1, x2, sigma_x1 = 24.6, sigma_x2 = 27.8, alpha = 0.05, null = 0)
+print(result)
+
+two_sample_Z_test <- function(x1, x2, sigma_x1, sigma_x2, alpha, null = 0, alternative = "two.sided") {
+  n1 <- length(x1)
+  n2 <- length(x2)
+  mean_x1 <- mean(x1)
+  mean_x2 <- mean(x2)
+  
+  # Standard error
+  se <- sqrt((sigma_x1^2 / n1) + (sigma_x2^2 / n2))
+  
+  # Z statistic
+  z <- (mean_x1 - mean_x2 - null) / se
+  
+  # p-value based on alternative hypothesis
+  if (alternative == "two.sided") {
+    p_value <- 2 * (1 - pnorm(abs(z)))
+    decision <- ifelse(p_value < alpha, "Reject H0", "Fail to reject H0")
+    alt_text <- "μ1 ≠ μ2"
+  } else if (alternative == "greater") {
+    p_value <- 1 - pnorm(z)
+    decision <- ifelse(p_value < alpha, "Reject H0", "Fail to reject H0")
+    alt_text <- "μ1 > μ2"
+  } else if (alternative == "less") {
+    p_value <- pnorm(z)
+    decision <- ifelse(p_value < alpha, "Reject H0", "Fail to reject H0")
+    alt_text <- "μ1 < μ2"
+  } else {
+    stop("Invalid alternative. Choose from 'two.sided', 'greater', or 'less'.")
+  }
+  
+  return(list(
+    z_value = z,
+    p_value = p_value,
+    decision = decision,
+    null_hypothesis = paste("H0: μ1 - μ2 =", null),
+    alternative_hypothesis = paste("Ha:", alt_text)
+  ))
+}
+
+result2 <- two_sample_Z_test(x1, x2, sigma_x1 = 24.6, sigma_x2 = 27.8, alpha = 0.05, null = 0, alternative = "two.sided")
+print(result2)
 
 
 # Question 2:
@@ -110,7 +164,7 @@ pre <- c(74, 72, 62, 58, 59, 65, 54, 63, 80, 66, 65, 64, 79, 60)
 post <- c(79, 55, 53, 53, 74, 55, 64, 55, 39, 44, 37, 68, 54, 54)
 
 # Test if post - pre > 0 → H0: median difference <= 0
-wilcox.test(post, pre, paired = TRUE, alternative = "greater", conf.level = 0.95)
+wilcox.test(post, pre, paired = TRUE, alternative = "greater", conf.level = 0.95, exact=FALSE)
 
 
 # Question 6
@@ -118,7 +172,7 @@ drug <- c(31.7, 75.0, 101.1, 60.5, 62.8, 59.3, 58.9, 91.3, 99.1, 52.0, 39.1)
 placebo <- c(59.3, 72.7, 100.5, 64.7, 69.0, 72.7, 69.6, 97.4, 100.6, 65.1, 65.7)
 
 # Test if placebo < drug → H0: placebo mean >= drug mean
-wilcox.test(placebo, drug, alternative = "less", conf.level = 0.95)
+wilcox.test(placebo, drug, alternative = "less", conf.level = 0.95,exact=FALSE)
 
 
 # Question 7:
@@ -133,6 +187,7 @@ y <- factor(rep(1:4, each = 7))  # Group labels
 
 # Perform Kruskal-Wallis test
 kruskal.test(x ~ y)
+
 
 ## Question 8
 chi_square_gof_test <- function(observed, expected, alpha = 0.05) {
