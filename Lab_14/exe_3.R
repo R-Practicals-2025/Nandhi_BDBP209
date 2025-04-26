@@ -176,7 +176,6 @@ rownames(matrix_data) <- c("Abuse", "No Abuse")
 fisher.test(matrix_data, alternative = "two.sided", conf.int = TRUE, conf.level = 0.95)
 
 ## Question 4
-# a)
 two_sample_variance_test <- function(x, y, alpha = 0.05) {
   var_x <- var(x)
   var_y <- var(y)
@@ -184,44 +183,83 @@ two_sample_variance_test <- function(x, y, alpha = 0.05) {
   df_y <- length(y) - 1
   
   F_value <- var_x / var_y
-  p_value <- 2 * min(pf(F_value, df_x, df_y), 1 - pf(F_value, df_x, df_y))  # two-tailed
-  
-  # Determine critical values
+  p_value <- 2 * min(pf(F_value, df_x, df_y), 1 - pf(F_value, df_x, df_y))  # Two-tailed
   lower <- qf(alpha / 2, df_x, df_y)
   upper <- qf(1 - alpha / 2, df_x, df_y)
   
-  conclusion <- ifelse(F_value < lower || F_value > upper,
-                       "Reject null: Variances are significantly different.",
-                       "Fail to reject null: No significant difference in variances.")
+  cat("Two-sample F-test for Equality of Variances\n")
+  cat("--------------------------------------------------\n")
+  cat("Variance of x:", round(var_x, 4), "\n")
+  cat("Variance of y:", round(var_y, 4), "\n")
+  cat("F-statistic =", round(F_value, 4), " | df1 =", df_x, ", df2 =", df_y, "\n")
+  cat("Critical F-range: [", round(lower, 4), ",", round(upper, 4), "]\n")
+  cat("p-value =", round(p_value, 4), "\n")
   
-  return(list(F_value = F_value, p_value = p_value, conclusion = conclusion))
+  if (F_value < lower || F_value > upper) {
+    cat("Conclusion: Reject H0. Variances are significantly different.\n")
+  } else {
+    cat("Conclusion: Fail to reject H0. No significant difference in variances.\n")
+  }
+  
+  invisible(list(F = F_value, p = p_value))
 }
 
-# b)
-x <- c(1067.7, 984.3,998.8,1025.9,1060.9,959.1,1013.8,
-       1047.0,987.8,1051.0,885.2,1049.5,1098.2,1001.5,1011.1,991.6)
-
-y <- c(957.6, 981.8, 1096.5, 984.4, 1074.3, 929.4, 1056.0,
-       1012.3, 1040.7, 1099.5, 1006.1, 1064.3, 865.6, 944.4, 1091.8, 952.1)
-
-result_f <- two_sample_variance_test(x, y, alpha = 0.05)
-print(result_f)
+# Sample data for Question 4
+x <- c(1067.7, 984.3,998.8,1025.9,1060.9,959.1,1013.8,1047.0,987.8,1051.0,885.2,1049.5,1098.2,1001.5,1011.1,991.6)
+y <- c(957.6, 981.8, 1096.5, 984.4, 1074.3, 929.4, 1056.0,1012.3, 1040.7, 1099.5, 1006.1, 1064.3, 865.6, 944.4, 1091.8, 952.1)
+two_sample_variance_test(x, y, alpha = 0.05)
 
 
-# Question 5:
+## Question 5
+signed_rank_test <- function(pre, post, alpha = 0.05) {
+  test <- wilcox.test(post, pre, paired = TRUE, alternative = "greater", conf.level = 1 - alpha, exact = FALSE)
+  
+  cat("Wilcoxon Signed-Rank Test (Paired, One-Tailed)\n")
+  cat("--------------------------------------------------\n")
+  cat("H0: median(post - pre) <= 0\n")
+  cat("H1: median(post - pre) > 0\n")
+  cat("Test statistic V =", test$statistic, "\n")
+  cat("p-value =", round(test$p.value, 4), "\n")
+  
+  if (test$p.value < alpha) {
+    cat("Conclusion: Reject H0. Median increase after is statistically significant.\n")
+  } else {
+    cat("Conclusion: Fail to reject H0. No statistically significant increase.\n")
+  }
+  
+  invisible(test)
+}
+
+# Sample data
 pre <- c(74, 72, 62, 58, 59, 65, 54, 63, 80, 66, 65, 64, 79, 60)
 post <- c(79, 55, 53, 53, 74, 55, 64, 55, 39, 44, 37, 68, 54, 54)
-
-# Test if post - pre > 0 → H0: median difference <= 0
-wilcox.test(post, pre, paired = TRUE, alternative = "greater", conf.level = 0.95, exact=FALSE)
+signed_rank_test(pre, post)
 
 
-# Question 6
+## Question 6
+rank_sum_test <- function(group1, group2, alpha = 0.05) {
+  test <- wilcox.test(group1, group2, alternative = "less", conf.level = 1 - alpha, exact = FALSE)
+  
+  cat("Wilcoxon Rank-Sum Test (Independent, One-Tailed)\n")
+  cat("--------------------------------------------------\n")
+  cat("H0: median(group1) >= median(group2)\n")
+  cat("H1: median(group1) < median(group2)\n")
+  cat("Test statistic W =", test$statistic, "\n")
+  cat("p-value =", round(test$p.value, 4), "\n")
+  
+  if (test$p.value < alpha) {
+    cat("Conclusion: Reject H0. Group 1 has significantly lower values than Group 2.\n")
+  } else {
+    cat("Conclusion: Fail to reject H0. No significant evidence that Group 1 is lower.\n")
+  }
+  
+  invisible(test)
+}
+
+# Sample data
 drug <- c(31.7, 75.0, 101.1, 60.5, 62.8, 59.3, 58.9, 91.3, 99.1, 52.0, 39.1)
 placebo <- c(59.3, 72.7, 100.5, 64.7, 69.0, 72.7, 69.6, 97.4, 100.6, 65.1, 65.7)
-
-# Test if placebo < drug → H0: placebo mean >= drug mean
-wilcox.test(placebo, drug, alternative = "less", conf.level = 0.95,exact=FALSE)
+rank_sum_test(placebo, drug)
 
 
 # Question 7:
