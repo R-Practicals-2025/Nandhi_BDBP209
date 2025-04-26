@@ -107,6 +107,55 @@ data_after  <- c(97,116,82,81,82,86,107,86,94,91,85,98,91,87)
 # Paired t-test
 t.test(data_before, data_after, paired = TRUE, alternative = "two.sided")
 
+## 2Q)
+detailed_t_test <- function(x, y, paired = FALSE, equal_var = FALSE, alpha = 0.05) {
+  # Perform t-test
+  test_result <- t.test(x, y, paired = paired, var.equal = equal_var, alternative = "two.sided", conf.level = 1 - alpha)
+  
+  cat("\n=====================================\n")
+  cat(ifelse(paired, "Paired t-test", "Two-sample (independent) t-test"), "\n")
+  cat("=====================================\n")
+  
+  cat("\nHypotheses:\n")
+  if (paired) {
+    cat("H₀: mean(before - after) = 0\n")
+    cat("H₁: mean(before - after) ≠ 0\n")
+  } else {
+    cat("H₀: mean(x) = mean(y)\n")
+    cat("H₁: mean(x) ≠ mean(y)\n")
+  }
+  
+  cat("\nTest Statistic:\n")
+  cat("t =", round(test_result$statistic, 4), " | df =", round(test_result$parameter, 2), "\n")
+  
+  cat("\np-value:\n")
+  cat("p =", round(test_result$p.value, 4), "\n")
+  
+  cat("\nConfidence Interval (", 100*(1-alpha), "%):\n", sep = "")
+  print(test_result$conf.int)
+  
+  cat("\nSample Means:\n")
+  cat("Mean of x =", round(mean(x), 3), "\n")
+  cat("Mean of y =", round(mean(y), 3), "\n")
+  
+  cat("\nConclusion:\n")
+  if (test_result$p.value < alpha) {
+    cat("Reject the null hypothesis. There is a statistically significant difference.\n")
+  } else {
+    cat("Fail to reject the null hypothesis. No statistically significant difference.\n")
+  }
+  
+  invisible(test_result)
+}
+# Question 2 a) Independent two-sample t-test
+Xvar <- c(4.95,5.37,4.70,4.96,4.72,5.17,5.28,5.12,5.26,5.48)
+Yvar <- c(4.65,4.86,4.57,4.56,4.96,4.63,5.04,4.92,5.37,4.58,4.26,4.40)
+detailed_t_test(Xvar, Yvar, paired = FALSE, equal_var = FALSE)
+
+# Question 2 b) Paired t-test
+data_before <- c(95,106,79,71,90,79,71,77,103,103,92,63,82,76)
+data_after  <- c(97,116,82,81,82,86,107,86,94,91,85,98,91,87)
+detailed_t_test(data_before, data_after, paired = TRUE)
 
 ## Question 3:
 ## a)
